@@ -3,6 +3,9 @@
    Download and action buttons
    ========================================================================== */
 
+import { t } from '../i18n.js';
+import { store } from '../state.js';
+
 const template = document.createElement('template');
 template.innerHTML = `
 <style>
@@ -181,12 +184,12 @@ template.innerHTML = `
 <div class="toolbar">
   <button class="btn btn--primary" id="btnDownloadPng" type="button">
     <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Descargar PNG
+    <span id="tBtnPng">Descargar PNG</span>
   </button>
 
   <button class="btn btn--secondary" id="btnDownloadBg" type="button">
     <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Con fondo
+    <span id="tBtnBg">Con fondo</span>
     <div class="color-picker-wrapper">
       <div class="color-swatch" id="colorSwatch" style="background: #ffffff;"></div>
       <input type="color" id="colorPicker" value="#ffffff" />
@@ -197,18 +200,18 @@ template.innerHTML = `
 
   <button class="btn btn--secondary" id="btnCopy" type="button">
     <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-    Copiar
+    <span id="tBtnCopy">Copiar</span>
   </button>
 
   <button class="btn btn--ghost" id="btnNew" type="button">
     <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Nueva
+    <span id="tBtnNew">Nueva</span>
   </button>
 </div>
 
 <div class="stats" id="stats">
-  <span class="stat">Procesado en <span class="stat__value" id="statTime">—</span></span>
-  <span class="stat">Tipo: <span class="stat__value" id="statType">—</span></span>
+  <span class="stat" id="tStatTime">Procesado en <span class="stat__value" id="statTime">—</span></span>
+  <span class="stat" id="tStatType">Tipo: <span class="stat__value" id="statType">—</span></span>
 </div>
 `;
 
@@ -229,9 +232,29 @@ export class ArToolbar extends HTMLElement {
 
     this._resultBlob = null;
     this._resultCanvas = null;
+
+    this._updateTexts = this._updateTexts.bind(this);
+  }
+
+  _updateTexts() {
+    this.shadowRoot.getElementById('tBtnPng').textContent = t('toolbar.downloadPng');
+    this.shadowRoot.getElementById('tBtnBg').textContent = t('toolbar.downloadBg');
+    this.shadowRoot.getElementById('tBtnCopy').textContent = t('toolbar.copy');
+    this.shadowRoot.getElementById('tBtnNew').textContent = t('toolbar.new');
+    
+    // We update stats only if they are active, because they contain inner HTML wrappers
+    if (this.hasAttribute('active')) {
+      const pTime = this._statTime.textContent.replace('s', ''); 
+      this.shadowRoot.getElementById('tStatTime').innerHTML = t('toolbar.statTime', pTime);
+      const pType = this._statType.textContent;
+      this.shadowRoot.getElementById('tStatType').innerHTML = t('toolbar.statType', pType);
+    }
   }
 
   connectedCallback() {
+    this._updateTexts();
+    store.addEventListener('change', this._updateTexts);
+
     // Download PNG (transparent)
     this._btnDownloadPng.addEventListener('click', () => {
       this._downloadCanvas(null);
@@ -261,6 +284,10 @@ export class ArToolbar extends HTMLElement {
     });
   }
 
+  disconnectedCallback() {
+    store.removeEventListener('change', this._updateTexts);
+  }
+
   /**
    * Set the result data for download
    * @param {HTMLCanvasElement} canvas 
@@ -271,10 +298,13 @@ export class ArToolbar extends HTMLElement {
     this.setAttribute('active', '');
 
     if (meta.processingTime) {
-      this._statTime.textContent = `${(meta.processingTime / 1000).toFixed(1)}s`;
+      const seconds = (meta.processingTime / 1000).toFixed(1);
+      this._statTime.textContent = `${seconds}s`; // For tracking
+      this.shadowRoot.getElementById('tStatTime').innerHTML = t('toolbar.statTime', seconds);
     }
     if (meta.imageType) {
-      this._statType.textContent = meta.imageType;
+      this._statType.textContent = meta.imageType; // For tracking
+      this.shadowRoot.getElementById('tStatType').innerHTML = t('toolbar.statType', meta.imageType);
     }
   }
 
@@ -315,13 +345,13 @@ export class ArToolbar extends HTMLElement {
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': blob })
       ]);
-      this._flashButton(this._btnCopy, '¡Copiado!');
+      this._flashButton(this.shadowRoot.getElementById('tBtnCopy'), t('toast.copied'));
     } catch (err) {
       console.warn('Clipboard write failed:', err);
       // Fallback: fire event
       this.dispatchEvent(new CustomEvent('toast', {
         bubbles: true, composed: true,
-        detail: { type: 'error', message: 'No se pudo copiar al portapapeles' }
+        detail: { type: 'error', message: t('toast.errCopy') }
       }));
     }
   }

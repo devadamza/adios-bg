@@ -37,8 +37,13 @@
   <!-- Favicon (inline SVG as data URL) -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%239b59b6'/><stop offset='100%25' stop-color='%2300bcd4'/></linearGradient></defs><rect width='100' height='100' rx='20' fill='url(%23g)'/><text x='50' y='68' text-anchor='middle' font-size='50' font-weight='bold' fill='white' font-family='sans-serif'>AB</text></svg>" />
 </head>
-<body>
   <div id="app">
+    <!-- Language Switcher -->
+    <div class="lang-switcher" style="position: absolute; top: 1.5rem; right: 1.5rem; display: flex; gap: 0.5rem;">
+      <button id="btnLangEs" style="background:none; border:none; color:hsl(0,0%,70%); cursor:pointer; font-weight:bold; font-size:1rem; opacity:0.5; transition:opacity 0.2s;" aria-label="Español">🇪🇸 ES</button>
+      <button id="btnLangEn" style="background:none; border:none; color:hsl(0,0%,70%); cursor:pointer; font-weight:bold; font-size:1rem; opacity:0.5; transition:opacity 0.2s;" aria-label="English">🇬🇧 EN</button>
+    </div>
+
     <!-- Header -->
     <header class="app-header">
       <div class="app-header__logo">
@@ -50,7 +55,7 @@
         </div>
         <h1 class="app-header__title">Adiós BG</h1>
       </div>
-      <p class="app-header__subtitle">
+      <p class="app-header__subtitle" data-i18n="header.subtitle">
         Elimina fondos de imágenes con IA, directo en tu navegador. Sin uploads, 100% privado.
       </p>
     </header>
@@ -68,14 +73,14 @@
       <div class="app-footer__badges">
         <span class="badge badge--privacy">
           <span class="badge__dot"></span>
-          100% Privado
+          <span data-i18n="footer.privacy">100% Privado</span>
         </span>
         <span class="badge badge--offline">
           <span class="badge__dot"></span>
-          Funciona Offline
+          <span data-i18n="footer.offline">Funciona Offline</span>
         </span>
       </div>
-      <p style="margin-top: 1rem;">
+      <p style="margin-top: 1rem;" data-i18n="footer.poweredBy">
         Procesado con <a href="https://huggingface.co/briaai/RMBG-1.4" target="_blank" rel="noopener">RMBG-1.4</a> 
         · Todo se ejecuta en tu dispositivo
       </p>

@@ -3,6 +3,9 @@
    Before/after comparison canvas with checkerboard transparency
    ========================================================================== */
 
+import { t } from '../i18n.js';
+import { store } from '../state.js';
+
 const template = document.createElement('template');
 template.innerHTML = `
 <style>
@@ -193,8 +196,8 @@ template.innerHTML = `
       <div class="compare-handle" id="compareHandle">
         <svg viewBox="0 0 24 24"><path d="M8 5l-5 7 5 7M16 5l5 7-5 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <span class="compare-label compare-label--before">Original</span>
-      <span class="compare-label compare-label--after">Resultado</span>
+      <span class="compare-label compare-label--before" id="tLabelBefore">Original</span>
+      <span class="compare-label compare-label--after" id="tLabelAfter">Resultado</span>
     </div>
   </div>
 
@@ -230,9 +233,22 @@ export class ArEditor extends HTMLElement {
     this._currentView = 'result';
     this._originalImg = null;
     this._resultImg = null;
+
+    this._updateTexts = this._updateTexts.bind(this);
+  }
+
+  _updateTexts() {
+    this.shadowRoot.getElementById('tLabelBefore').textContent = t('editor.original');
+    this.shadowRoot.getElementById('tLabelAfter').textContent = t('editor.result');
+    this._btnOriginal.textContent = t('editor.original');
+    this._btnResult.textContent = t('editor.result');
+    this._btnCompare.textContent = t('editor.compare');
   }
 
   connectedCallback() {
+    this._updateTexts();
+    store.addEventListener('change', this._updateTexts);
+    
     this._btnResult.addEventListener('click', () => this._setView('result'));
     this._btnOriginal.addEventListener('click', () => this._setView('original'));
     this._btnCompare.addEventListener('click', () => this._setView('compare'));
@@ -256,6 +272,10 @@ export class ArEditor extends HTMLElement {
       this._canvasResult.style.transform = `scale(${this._zoom})`;
       this._zoomLabel.textContent = `${Math.round(this._zoom * 100)}%`;
     }, { passive: false });
+  }
+
+  disconnectedCallback() {
+    store.removeEventListener('change', this._updateTexts);
   }
 
   /**

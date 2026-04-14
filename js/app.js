@@ -4,6 +4,7 @@
    ========================================================================== */
 
 import { store } from './state.js';
+import { t } from './i18n.js';
 
 // ── Import Web Components (self-registering) ────────────────────────────────
 import './components/ar-dropzone.js';
@@ -46,10 +47,10 @@ function handleWorkerMessage(e) {
   switch (msg.type) {
     case 'status':
       if (msg.stage === 'loading-model') {
-        store.set({ status: 'loading-model', currentStage: msg.message });
+        store.set({ status: 'loading-model', currentStage: t(msg.messageKey || msg.message) });
       } else if (msg.stage === 'model-ready') {
         store.set({ modelLoaded: true });
-        toast.show({ type: 'success', message: 'Modelo de IA cargado y listo', duration: 3000 });
+        toast.show({ type: 'success', message: t('toast.modelReady'), duration: 3000 });
       }
       break;
 
@@ -58,12 +59,12 @@ function handleWorkerMessage(e) {
         status: 'processing',
         stageIndex: msg.stageIndex,
         progress: msg.progress,
-        currentStage: msg.message,
+        currentStage: msg.messageKey ? t(msg.messageKey, msg.messageVal) : msg.message,
       });
       if (msg.imageType) store.set({ imageType: msg.imageType });
       if (msg.watermarkDetected) store.set({ watermarkDetected: true });
 
-      progress.update(msg.stageIndex, msg.progress, msg.message);
+      progress.update(msg.stageIndex, msg.progress, msg.messageKey ? t(msg.messageKey, msg.messageVal) : msg.message);
       break;
 
     case 'complete':
@@ -71,9 +72,10 @@ function handleWorkerMessage(e) {
       break;
 
     case 'error':
-      store.set({ status: 'error', errorMessage: msg.message });
+      const errText = msg.messageKey ? t(msg.messageKey, msg.messageVal) : msg.message;
+      store.set({ status: 'error', errorMessage: errText });
       progress.reset();
-      toast.show({ type: 'error', message: msg.message, duration: 6000 });
+      toast.show({ type: 'error', message: errText, duration: 6000 });
       break;
   }
 }
@@ -111,7 +113,7 @@ async function handleComplete(msg) {
   // Success toast
   toast.show({
     type: 'success',
-    message: `¡Fondo eliminado en ${(processingTime / 1000).toFixed(1)}s!`,
+    message: t('toast.successDone', (processingTime / 1000).toFixed(1)),
     duration: 4000,
   });
 }
@@ -184,8 +186,34 @@ document.addEventListener('toast', (e) => {
   toast.show(e.detail);
 });
 
+// ── i18n & DOM Updates ──────────────────────────────────────────────────────
+function updateDOMTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    const key = el.getAttribute('data-i18n');
+    el.innerHTML = t(key);
+  });
+  
+  // Highlight active language button
+  const lang = store.state.language;
+  document.getElementById('btnLangEs').style.opacity = lang === 'es' ? '1' : '0.5';
+  document.getElementById('btnLangEn').style.opacity = lang === 'en' ? '1' : '0.5';
+}
+
+document.getElementById('btnLangEs').addEventListener('click', () => {
+  localStorage.setItem('adiosbg-lang', 'es');
+  store.set({ language: 'es' });
+  updateDOMTranslations();
+});
+
+document.getElementById('btnLangEn').addEventListener('click', () => {
+  localStorage.setItem('adiosbg-lang', 'en');
+  store.set({ language: 'en' });
+  updateDOMTranslations();
+});
+
 // ── Initialize ──────────────────────────────────────────────────────────────
 function init() {
+  updateDOMTranslations();
   createWorker();
 
   // Register Service Worker

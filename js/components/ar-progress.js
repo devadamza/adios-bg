@@ -3,6 +3,9 @@
    Multi-stage pipeline progress indicator
    ========================================================================== */
 
+import { t } from '../i18n.js';
+import { store } from '../state.js';
+
 const STAGES = [
   { id: 'classify',   label: 'Clasificar',    icon: '🔍' },
   { id: 'watermark',  label: 'Watermarks',    icon: '🔬' },
@@ -195,7 +198,7 @@ template.innerHTML = `
       <div class="stage" data-index="${i}" id="stage-${i}">
         <span class="stage__icon">${s.icon}</span>
         <span class="stage__check">✅</span>
-        <span class="stage__label">${s.label}</span>
+        <span class="stage__label" id="tStage${i}">${s.label}</span>
       </div>
     `).join('')}
   </div>
@@ -219,11 +222,35 @@ export class ArProgress extends HTMLElement {
     
     this._startTime = null;
     this._rafId = null;
+
+    this._updateTexts = this._updateTexts.bind(this);
   }
 
-  connectedCallback() {}
+  _updateTexts() {
+    this.shadowRoot.getElementById('tStage0').textContent = t('progress.stage1');
+    this.shadowRoot.getElementById('tStage1').textContent = t('progress.stage2');
+    this.shadowRoot.getElementById('tStage2').textContent = t('progress.stage3');
+    this.shadowRoot.getElementById('tStage3').textContent = t('progress.stage4');
+    
+    // Only translate the status if it's currently hardcoded defaults
+    if (!this.hasAttribute('active') && !this.hasAttribute('done')) {
+      this._statusText.textContent = t('progress.processing');
+    } else if (this.hasAttribute('done')) {
+      this._statusText.textContent = t('progress.done');
+    } else {
+      // If active, it means the worker has sent a specific message, 
+      // the app.js will handle re-translating the current active stage text.
+       this._statusText.textContent = store.state.currentStage || t('progress.processing');
+    }
+  }
+
+  connectedCallback() {
+    this._updateTexts();
+    store.addEventListener('change', this._updateTexts);
+  }
 
   disconnectedCallback() {
+    store.removeEventListener('change', this._updateTexts);
     if (this._rafId) cancelAnimationFrame(this._rafId);
   }
 
@@ -263,7 +290,7 @@ export class ArProgress extends HTMLElement {
   complete(totalTime) {
     this.setAttribute('done', '');
     this._fill.style.width = '100%';
-    this._statusText.textContent = '¡Completado!';
+    this._statusText.textContent = t('progress.done');
     
     this._stageEls.forEach(el => {
       el.classList.remove('active');
@@ -287,7 +314,7 @@ export class ArProgress extends HTMLElement {
     this.removeAttribute('active');
     this.removeAttribute('done');
     this._fill.style.width = '0%';
-    this._statusText.textContent = 'Procesando...';
+    this._statusText.textContent = t('progress.processing');
     this._timeDisplay.textContent = '0.0s';
     this._stageEls.forEach(el => el.classList.remove('active', 'done'));
     

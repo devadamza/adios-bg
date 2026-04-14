@@ -7,6 +7,9 @@ const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'
 const MAX_SIZE_MB = 20;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
+import { t } from '../i18n.js';
+import { store } from '../state.js';
+
 const template = document.createElement('template');
 template.innerHTML = `
 <style>
@@ -252,13 +255,13 @@ template.innerHTML = `
     </svg>
   </div>
   <div class="text">
-    <div class="text__title">Suelta tu imagen aquí</div>
-    <div class="text__subtitle">o haz clic para seleccionar un archivo</div>
-    <div class="text__formats">PNG, JPG, WebP, SVG, BMP · Máx ${MAX_SIZE_MB}MB</div>
+    <div class="text__title" id="tTitle">Suelta tu imagen aquí</div>
+    <div class="text__subtitle" id="tSubtitle">o haz clic para seleccionar un archivo</div>
+    <div class="text__formats" id="tFormats">PNG, JPG, WebP, SVG, BMP · Máx ${MAX_SIZE_MB}MB</div>
   </div>
   <button class="btn-browse" id="btnBrowse" type="button">Seleccionar archivo</button>
   <div class="paste-hint">
-    <span>También puedes pegar con</span>
+    <span id="tPasteHint">También puedes pegar con</span>
     <kbd>⌘V</kbd>
   </div>
 </div>
@@ -290,9 +293,23 @@ export class ArDropzone extends HTMLElement {
     this._previewImg = this.shadowRoot.getElementById('previewImg');
     this._previewName = this.shadowRoot.getElementById('previewName');
     this._previewMeta = this.shadowRoot.getElementById('previewMeta');
+    
+    this._updateTexts = this._updateTexts.bind(this);
+  }
+
+  _updateTexts() {
+    this.shadowRoot.getElementById('tTitle').textContent = t('dropzone.title');
+    this.shadowRoot.getElementById('tSubtitle').textContent = t('dropzone.subtitle');
+    this.shadowRoot.getElementById('tFormats').textContent = t('dropzone.formats', MAX_SIZE_MB);
+    this._btnBrowse.textContent = t('dropzone.btnBrowse');
+    this.shadowRoot.getElementById('tPasteHint').textContent = t('dropzone.pasteHint');
+    this._btnChange.textContent = t('dropzone.btnChange');
   }
 
   connectedCallback() {
+    this._updateTexts();
+    store.addEventListener('change', this._updateTexts);
+    
     // Drag events
     this._dropzone.addEventListener('dragenter', this._onDragEnter.bind(this));
     this._dropzone.addEventListener('dragover', this._onDragOver.bind(this));
@@ -325,6 +342,7 @@ export class ArDropzone extends HTMLElement {
   }
 
   disconnectedCallback() {
+    store.removeEventListener('change', this._updateTexts);
     document.removeEventListener('paste', this._onPaste.bind(this));
   }
 
@@ -371,7 +389,7 @@ export class ArDropzone extends HTMLElement {
     if (!ACCEPTED_TYPES.includes(file.type) && !file.type.startsWith('image/')) {
       this.dispatchEvent(new CustomEvent('dropzone-error', {
         bubbles: true, composed: true,
-        detail: { message: `Formato no soportado: ${file.type || 'desconocido'}` }
+        detail: { message: t('dropzone.err.format', file.type || 'unknown') }
       }));
       return;
     }
@@ -380,7 +398,7 @@ export class ArDropzone extends HTMLElement {
     if (file.size > MAX_SIZE_BYTES) {
       this.dispatchEvent(new CustomEvent('dropzone-error', {
         bubbles: true, composed: true,
-        detail: { message: `El archivo excede el límite de ${MAX_SIZE_MB}MB` }
+        detail: { message: t('dropzone.err.size', MAX_SIZE_MB) }
       }));
       return;
     }

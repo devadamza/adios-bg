@@ -45,7 +45,22 @@ const AppState = {
   
   /** @type {number} ms taken for processing */
   processingTime: 0,
+  
+  /** @type {'es'|'en'} */
+  language: 'es',
 };
+
+// Initialize language from localStorage or navigator
+try {
+  const storedLang = localStorage.getItem('adiosbg-lang');
+  if (storedLang === 'es' || storedLang === 'en') {
+    AppState.language = storedLang;
+  } else if (navigator.language && !navigator.language.startsWith('es')) {
+    AppState.language = 'en';
+  }
+} catch (e) {
+  // Ignore localStorage errors
+}
 
 class StateManager extends EventTarget {
   constructor() {
@@ -118,6 +133,7 @@ class StateManager extends EventTarget {
       stageIndex: -1,
       errorMessage: null,
       processingTime: 0,
+      language: this._state.language, // preserve
     });
   }
 }

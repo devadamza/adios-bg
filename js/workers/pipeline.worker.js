@@ -37,7 +37,7 @@ async function initModel() {
   if (segmenter || isModelLoading) return;
   isModelLoading = true;
 
-  notify('status', { stage: 'loading-model', message: 'Cargando modelo de IA...' });
+  notify('status', { stage: 'loading-model', messageKey: 'worker.loadingModel' });
 
   try {
     // Dynamic import of Transformers.js
@@ -58,7 +58,7 @@ async function initModel() {
       });
     });
 
-    notify('status', { stage: 'model-ready', message: 'Modelo cargado' });
+    notify('status', { stage: 'model-ready', messageKey: 'worker.modelReady' });
     isModelLoading = false;
   } catch (err) {
     isModelLoading = false;
@@ -76,50 +76,51 @@ async function processImage(imageData, width, height, id) {
     let imgData = new ImageData(new Uint8ClampedArray(imageData), width, height);
 
     // ── Stage 1: Classification ─────────────────────────────────────────
-    notify('progress', { stageIndex: 0, progress: 5, message: 'Analizando imagen...' });
+    notify('progress', { stageIndex: 0, progress: 5, messageKey: 'worker.analyzing' });
     
     const classification = classifyImage(imgData);
     notify('progress', { 
       stageIndex: 0, progress: 15, 
-      message: `Detectado: ${classification.type}`,
+      messageKey: 'worker.detected',
+      messageVal: classification.type,
       imageType: classification.type
     });
 
     // ── Stage 2: Watermark detection ────────────────────────────────────
-    notify('progress', { stageIndex: 1, progress: 20, message: 'Buscando marcas de agua...' });
+    notify('progress', { stageIndex: 1, progress: 20, messageKey: 'worker.searchingWatermarks' });
     
     const watermark = detectWatermark(imgData);
     
     if (watermark.found) {
       notify('progress', { 
         stageIndex: 1, progress: 25, 
-        message: 'Marca de agua detectada, reparando...',
+        messageKey: 'worker.repairingWatermark',
         watermarkDetected: true
       });
       // Inpaint the watermark region
       imgData = inpaintSimple(imgData, watermark.mask, 7);
     }
 
-    notify('progress', { stageIndex: 1, progress: 30, message: 'Watermarks: OK' });
+    notify('progress', { stageIndex: 1, progress: 30, messageKey: 'worker.watermarksOk' });
 
     // ── Stage 3: Segmentation ───────────────────────────────────────────
     if (classification.type === 'icon' || classification.type === 'signature') {
       // Fast path: threshold-based removal for simple graphics
-      notify('progress', { stageIndex: 2, progress: 50, message: 'Eliminando fondo (modo rápido)...' });
+      notify('progress', { stageIndex: 2, progress: 50, messageKey: 'worker.fastMode' });
       
       imgData = removeSimpleBackground(imgData, classification.type);
       
-      notify('progress', { stageIndex: 2, progress: 75, message: 'Fondo eliminado' });
+      notify('progress', { stageIndex: 2, progress: 75, messageKey: 'worker.bgRemoved' });
     } else {
       // ML path: use RMBG-1.4 for photos
-      notify('progress', { stageIndex: 2, progress: 35, message: 'Iniciando segmentación ML...' });
+      notify('progress', { stageIndex: 2, progress: 35, messageKey: 'worker.initMl' });
 
       // Ensure model is loaded
       if (!segmenter) {
         await initModel();
       }
 
-      notify('progress', { stageIndex: 2, progress: 40, message: 'Procesando con IA...' });
+      notify('progress', { stageIndex: 2, progress: 40, messageKey: 'worker.processingAi' });
 
       // Create a blob from imageData to pass to the pipeline
       const canvas = new OffscreenCanvas(width, height);
@@ -133,7 +134,7 @@ async function processImage(imageData, width, height, id) {
         mask_threshold: 0.5,
       });
 
-      notify('progress', { stageIndex: 2, progress: 70, message: 'Segmentación completada' });
+      notify('progress', { stageIndex: 2, progress: 70, messageKey: 'worker.segComplete' });
 
       // Extract mask from results
       // Transformers.js returns array of { label, score, mask (RawImage) }
@@ -165,14 +166,14 @@ async function processImage(imageData, width, height, id) {
         }
 
         // ── Stage 4: Refinement ───────────────────────────────────────
-        notify('progress', { stageIndex: 3, progress: 80, message: 'Refinando bordes...' });
+        notify('progress', { stageIndex: 3, progress: 80, messageKey: 'worker.refining' });
 
         const refinedMask = refineMask(alphaMask, width, height, {
           featherRadius: 2,
           erodeRadius: 1,
         });
 
-        notify('progress', { stageIndex: 3, progress: 90, message: 'Aplicando máscara...' });
+        notify('progress', { stageIndex: 3, progress: 90, messageKey: 'worker.applyingMask' });
 
         imgData = applyAlphaMask(imgData, refinedMask, { defringe: true });
       }
@@ -181,7 +182,7 @@ async function processImage(imageData, width, height, id) {
     // ── Final: Send result ──────────────────────────────────────────────
     const elapsed = performance.now() - startTime;
     
-    notify('progress', { stageIndex: 3, progress: 95, message: 'Generando resultado...' });
+    notify('progress', { stageIndex: 3, progress: 95, messageKey: 'worker.generatingResult' });
 
     // Convert final ImageData to PNG blob via OffscreenCanvas
     const outCanvas = new OffscreenCanvas(width, height);
@@ -201,7 +202,8 @@ async function processImage(imageData, width, height, id) {
     console.error('[Worker] Processing failed:', err);
     notify('error', { 
       id, 
-      message: `Error procesando: ${err.message}` 
+      message: `Error procesando: ${err.message}`,
+      messageKey: 'toast.errInternal'
     });
   }
 }
