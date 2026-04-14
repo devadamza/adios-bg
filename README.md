@@ -3,6 +3,8 @@
 <div align="center">
   <img src="assets/icons/icon-192.png" alt="Adiós BG Icon" width="120" height="120">
   <h3>Elimina fondos de imágenes directamente en tu navegador, 100% privado y offline.</h3>
+  <br>
+  <a href="https://devadamza.github.io/adios-bg/"><strong>👉 Probar Live Demo 👈</strong></a>
 </div>
 
 ---
