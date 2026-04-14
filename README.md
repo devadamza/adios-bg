@@ -2,48 +2,49 @@
 
 <div align="center">
   <img src="assets/icons/icon-512.svg" alt="Adiós BG Icon" width="120" height="120">
-  <h3>Elimina fondos de imágenes directamente en tu navegador, 100% privado y offline.</h3>
+  <h3>Remove image backgrounds directly in your browser, 100% private and offline.</h3>
   <br>
-  <a href="https://devadamza.github.io/adios-bg/"><strong>👉 Probar Live Demo 👈</strong></a>
+  <a href="https://devadamza.github.io/adios-bg/"><strong>👉 Live Demo 👈</strong></a>
 </div>
 
 ---
 
-**Adiós BG** es una Progressive Web App (PWA) construida con Vanilla JS y Web Components que permite eliminar el fondo de las imágenes utilizando Inteligencia Artificial, pero **sin enviar tus fotos a ningún servidor**. Todo el procesamiento pesado ocurre de forma local en el dispositivo del usuario.
+**Adiós BG** is a Privacy-First Progressive Web App (PWA) built with Vanilla JS and Web Components that allows you to remove the background of your images using AI, **without sending your photos to any server**. All heavy lifting and processing occurs completely locally on your device.
 
-## ✨ Características Principales
+## ✨ Key Features
 
-- **100% Client-Side**: Respeto total a tu privacidad. Las imágenes nunca abandonan tu navegador.
-- **Inteligencia Artificial Local**: Integración del modelo `briaai/RMBG-1.4` (versión cuantificada ~44MB) gracias a [Transformers.js](https://huggingface.co/docs/transformers.js/index) impulsado por aceleración de hardware WebGPU / WebAssembly.
-- **Offline By Default**: Funciona como una PWA. Tras la primera carga, los modelos se almacenan en caché vía Service Worker y la app funciona completamente sin conexión a Internet.
-- **Multihilo (Web Workers)**: La UI principal nunca se congela. El flujo de Computer Vision y Machine Learning corre de manera optimizada en hilos separados usando `OffscreenCanvas`.
-- **Diseño Premium**: Interfaz moderna basada en Dark Mode Glassmorphism. Cero dependencias CSS como Tailwind/Bootstrap.
-- **Componentes Vanilla**: Arquitectura modular con Web Components nativos (`<ar-dropzone>`, `<ar-editor>`, `<ar-progress>`) sin la sobrecarga de frameworks como React o Vue.
+- **100% Client-Side**: Total respect for your privacy. Your images never leave your browser.
+- **Local AI Engine**: Seamless integration of the `briaai/RMBG-1.4` model (quantized version, ~44MB) via [Transformers.js](https://huggingface.co/docs/transformers.js/index), powered by WebGPU and WebAssembly hardware acceleration.
+- **Offline By Default**: Operates purely as a PWA. After the initial load, models are cached via a Service Worker, and the app functions completely offline.
+- **Multi-threaded (Web Workers)**: The main UI never freezes. Computer Vision and Machine Learning flows run fully optimized in separate threads utilizing `OffscreenCanvas`.
+- **Premium Design**: Modern Dark Mode Glassmorphism UI. Zero heavy CSS frameworks like Tailwind or Bootstrap.
+- **Vanilla Components**: Modular architecture using native Web Components (`<ar-dropzone>`, `<ar-editor>`, `<ar-progress>`) without the bloat of React or Vue. 
+- **i18n Support**: Dynamically switch between English and Spanish.
 
-## 🛠️ Stack Tecnológico
+## 🛠️ Tech Stack
 
 - **Frontend Core**: HTML5, Vanilla JavaScript, CSS3
-- **Arquitectura**: Web Components (Custom Elements, Shadow DOM), Web Workers, Service Workers
+- **Architecture**: Web Components (Custom Elements, Shadow DOM), Web Workers, Service Workers
 - **Machine Learning**: `ONNX Runtime Web`, `@huggingface/transformers`
-- **Algoritmos y CV**: Alpha Matting y Edge Refinement implementados en JavaScript puro para un halo ultralimpio.
-- **UI/UX**: Variables sintácticas nativas (Design Tokens), animaciones ligeras.
+- **Algorithms & CV**: Custom Alpha Matting and Edge Refinement pipelines written in pure JavaScript for ultra-clean halos.
+- **UI/UX**: Native CSS Custom Properties (Design Tokens), lightweight micro-animations.
 
-## 🚀 Cómo usar localmente
+## 🚀 Local Deployment
 
-Para ejecutar la aplicación localmente, solo necesitas servir la carpeta raíz usando cualquier servidor HTTP estático (ya que no se requiere Backend). Por ejemplo:
+To run the application locally, simply serve the root directory using any static HTTP server (since no backend is needed). For example:
 
-1. Clona este repositorio.
-2. Si tienes Node.js, ejecuta:
+1. Clone this repository.
+2. If you have Node.js installed, run:
 ```bash
 npx serve .
 ```
-3. O usando Python:
+3. Or using Python:
 ```bash
 python3 -m http.server 3000
 ```
-4. Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📝 Licencia / Notas de uso
+## 📝 License & Usage Notes
 
-- El código base de esta interfaz es de código abierto.
-- **Precaución**: Esta app utiliza por defecto el modelo `briaai/RMBG-1.4`. Por favor, revisa la licencia comercial específica de [BRIA AI](https://huggingface.co/briaai/RMBG-1.4) antes de desplegar este entorno para fines comerciales o de lucro de manera masiva.
+- The codebase covering the User Interface and the logic of this repository is provided under the **MIT License**.
+- **Important**: This app uses the `briaai/RMBG-1.4` model by default. Please review the specific [BRIA AI commercial license](https://huggingface.co/briaai/RMBG-1.4) before deploying this codebase for commercial or massive for-profit purposes, as the model itself restricts unbound commercialization without permission.
