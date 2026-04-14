@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- SEO -->
+  <title>Adiós BG — Elimina fondos de imágenes en tu navegador</title>
+  <meta name="description" content="Quita el fondo de tus fotos directamente en el navegador. 100% privado, sin uploads al servidor, funciona offline. Usa inteligencia artificial avanzada." />
+  <meta name="keywords" content="quitar fondo, eliminar fondo, background removal, transparente, PNG, privacidad, offline, IA" />
+  <meta name="author" content="Adiós BG" />
+  <meta name="robots" content="index, follow" />
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Adiós BG — Elimina fondos de imágenes" />
+  <meta property="og:description" content="Quita fondos con IA directamente en tu navegador. Sin uploads, 100% privado." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="./assets/icons/icon-512.png" />
+  
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#1a1625" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="./assets/icons/icon-192.png" />
+  
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="preconnect" href="https://huggingface.co" />
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="./css/index.css" />
+  
+  <!-- Favicon (inline SVG as data URL) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%239b59b6'/><stop offset='100%25' stop-color='%2300bcd4'/></linearGradient></defs><rect width='100' height='100' rx='20' fill='url(%23g)'/><text x='50' y='68' text-anchor='middle' font-size='50' font-weight='bold' fill='white' font-family='sans-serif'>AB</text></svg>" />
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="app-header__logo">
+        <div class="app-header__icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" fill="none" stroke="white" stroke-width="1.5"/>
+            <path d="M4 12h4l2-3 3 6 2-3h5" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1 class="app-header__title">Adiós BG</h1>
+      </div>
+      <p class="app-header__subtitle">
+        Elimina fondos de imágenes con IA, directo en tu navegador. Sin uploads, 100% privado.
+      </p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <ar-dropzone id="dropzone"></ar-dropzone>
+      <ar-progress id="progress"></ar-progress>
+      <ar-editor id="editor"></ar-editor>
+      <ar-toolbar id="toolbar"></ar-toolbar>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="app-footer__badges">
+        <span class="badge badge--privacy">
+          <span class="badge__dot"></span>
+          100% Privado
+        </span>
+        <span class="badge badge--offline">
+          <span class="badge__dot"></span>
+          Funciona Offline
+        </span>
+      </div>
+      <p style="margin-top: 1rem;">
+        Procesado con <a href="https://huggingface.co/briaai/RMBG-1.4" target="_blank" rel="noopener">RMBG-1.4</a> 
+        · Todo se ejecuta en tu dispositivo
+      </p>
+    </footer>
+  </div>
+
+  <!-- App Script -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
